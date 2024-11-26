@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Результаты поиска</title>
+    <style>
+        .accordion-container {
+            max-height: 600px; /* Устанавливается максимальная высота блока аккордеона */
+            overflow-y: auto; /* Включаем вертикальный скролл */
+            border: 1px solid #ddd; /* Опциональная рамка вокруг блока аккордеона */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'homenotes' %}">Homenotes</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-md-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Выход</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        <h2>Результаты поиска для: "{{ query }}"</h2>
+
+        <!-- Форма поиска -->
+        <form method="get" action="{% url 'search_notes' %}">
+            <input type="text" name="Поиск" value="{{ query }}" class="form-control mb-2" placeholder="Поиск..." required>
+            <button type="submit" class="btn btn-primary">Найти</button>
+        </form>
+
+        <h3>Найденные заметки:</h3>
+        <div class="accordion-container">
+            <div class="accordion" id="accordionNotes">
+                {% for note in notes %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading{{ note.id }}">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse{{ note.id }}" aria-expanded="false"
+                                aria-controls="collapse{{ note.id }}">
+                            {{ note.title|default:note.content|truncatechars:80 }}
+                        </button>
+                    </h2>
+                    <div id="collapse{{ note.id }}" class="accordion-collapse collapse"
+                         aria-labelledby="heading{{ note.id }}" data-bs-parent="#accordionNotes">
+                        <div class="accordion-body">
+                            <strong>{{ note.title }}</strong><br>
+                            {{ note.content }}<br>
+                            <small class="text-muted">{% if note.updated_at|date:"SHORT_DATETIME_FORMAT" %}
+                                                            {{note.updated_at|date:"SHORT_DATETIME_FORMAT"}}
+                                                        {% else %}
+                                                            {{ note.created_at|date:"SHORT_DATETIME_FORMAT" }}
+                                                        {% endif %}</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>Заметки не найдены.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <a href="{% url 'homenotes' %}" class="btn btn-secondary mt-3">Вернуться к заметкам</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
